@@ -80,7 +80,7 @@ public class Resolver
         let cls:AnyClass? = NSClassFromString(name)
         let type:NSObject.Type = cls as! NSObject.Type
         if useStatic == false{
-            return type() as? T
+            return type.init() as? T
         } else {
             return type.sharedInstance as? T
         }
@@ -93,11 +93,11 @@ public class Resolver
     //: Then your real implementation is called: My and lives in AppName
     //: Your test implementation is called: TestMy and lives in AppNameFrameworkTest
     //:
-    public class func Resolve<T>(name:String, useStatic:Bool = false) -> T?
+    public class func Resolve<T>(name:String, useStatic:Bool = false, useTestFallBack:Bool = false) -> T?
     {
         let bundleName = NSBundle.mainBundle().infoDictionary!["CFBundleName"] as! String
         let appPrefix = bundleName + "Framework"
-        let uitest = Process.arguments.contains(Resolver_test_arument)
+        let test = Process.arguments.contains(Resolver_test_arument)
         
         var protocolName = "\(T.self)"
         protocolName = protocolName.stringByReplacingOccurrencesOfString("Swift.Optional", withString: "")
@@ -107,9 +107,12 @@ public class Resolver
         protocolName = protocolName.stringByReplacingOccurrencesOfString(appPrefix, withString: "")
         protocolName = protocolName.stringByReplacingOccurrencesOfString("Protocol", withString: "")
         let defaultName = bundleName + "." + protocolName
+        let testName = appPrefix + "Test" + ".Test" + protocolName
+        
+        print("Resolving: \(protocolName)")
         
         var obj:AnyObject!
-        if uitest == false
+        if test == false
         {
             // Load real implementation
             obj = loadDefault(defaultName, useStatic: useStatic)
@@ -123,47 +126,56 @@ public class Resolver
             {
                 let rangeToRemove = Range<String.Index>(start: Resolver_test_prefix.startIndex, end: Resolver_test_prefix.endIndex)
                 base64Encoded = first.stringByReplacingCharactersInRange(rangeToRemove, withString: "")
-            } else {
-                print("No data found found")
-                return nil
-            }
-            
-            
-            let data = NSData(base64EncodedString: base64Encoded, options: NSDataBase64DecodingOptions(rawValue: 0))!
-            
-            // Try and parse them in a dictionary
-            var jsonObj:[String:String]!
-            do
-            {
-                jsonObj = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions(rawValue: 0)) as! [String : String]
-            } catch let error as NSError {
-                print("error parsing serialized object to dictionary: \(error.localizedDescription)")
-            }
-            
-            // For each entity
-            for (key, value) in jsonObj
-            {
-                // Extract the base64 data and unarchive
-                let base64Object = NSData(base64EncodedString: value, options: NSDataBase64DecodingOptions(rawValue: 0))!
-                if let inst = NSKeyedUnarchiver.unarchiveObjectWithData(base64Object) as? T
+                
+                
+                let data = NSData(base64EncodedString: base64Encoded, options: NSDataBase64DecodingOptions(rawValue: 0))!
+                
+                // Try and parse them in a dictionary
+                var jsonObj:[String:String]!
+                do
                 {
-                    // If we want a static, try and find it here
-                    if
-                        let existingInst = testSingletons[key] as? NSObject.Type
-                        where useStatic
+                    jsonObj = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions(rawValue: 0)) as! [String : String]
+                } catch let error as NSError {
+                    print("error parsing serialized object to dictionary: \(error.localizedDescription)")
+                }
+                
+                // For each entity
+                for (key, value) in jsonObj
+                {
+                    // Extract the base64 data and unarchive
+                    let base64Object = NSData(base64EncodedString: value, options: NSDataBase64DecodingOptions(rawValue: 0))!
+                    if let inst = NSKeyedUnarchiver.unarchiveObjectWithData(base64Object) as? T
                     {
-                        return existingInst.sharedInstance as? T
-                    }
-                    
-                    // Otherwise "init()" one up.
-                    let name = "\(inst.self)"
-                    if name.rangeOfString(key) != nil
-                    {
-                        testSingletons[key] = inst as! NSObject
-                        return inst// as? T
+                        // If we want a static, try and find it here
+                        if
+                            let existingInst = testSingletons[key] as? NSObject.Type
+                            where useStatic
+                        {
+                            return existingInst.sharedInstance as? T
+                        }
+                        
+                        // Otherwise "init()" one up.
+                        let name = "\(inst.self)"
+                        if name.rangeOfString(key) != nil
+                        {
+                            testSingletons[key] = inst as! NSObject
+                            return inst// as? T
+                        }
                     }
                 }
+                
+                
+            } else if useTestFallBack {
+                print("No data found found, try useTestFallBack: \(useTestFallBack)")
+                
+                obj = loadDefault(testName, useStatic: useStatic)
+                testSingletons[testName] = obj
+                
+                return obj as? T
+            } else {
+                
             }
+            
             
             // load a default, if no test implementation was found.
             obj = loadDefault(defaultName, useStatic: useStatic)
