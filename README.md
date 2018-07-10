@@ -1,6 +1,7 @@
 # Resolver
 Dependency Injection for RealCode &amp; UI Tests
 
+```
     public protocol WebServiceProtocol {
         func myWebMethod()
     }
@@ -21,7 +22,8 @@ Dependency Injection for RealCode &amp; UI Tests
             webService = Resolver.Resolve("WebService")
         }
     
-     	init() {
+        init() {
             satisfyDependencies()
         }
     }
+```
