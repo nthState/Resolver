@@ -1,32 +1,27 @@
 # Resolver
 Dependency Injection for RealCode &amp; UI Tests
 
-    public protocol WebServiceProtocol
-    {
+    public protocol WebServiceProtocol {
         func myWebMethod()
     }
 
-    public class WebService : NSObject, WebServiceProtocol
-    {
+    public class WebService : WebServiceProtocol {
         func myWebMethod() {}
     }
 
-    public class TestWebService : NSObject, WebServiceProtocol
-    {
+    public class TestWebService : WebServiceProtocol {
         func myWebMethod() {}
     }
 
-    class MyService : NSObject
-    {
+    class MyService {
+    
         var webService:WebServiceProtocol!
-        func satisfy()
-        {
+        
+        func satisfyDependencies() {
             webService = Resolver.Resolve("WebService")
         }
     
-        override init()
-        {
-            super.init()
-            satisfy()
+     	init() {
+            satisfyDependencies()
         }
     }
