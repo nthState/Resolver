@@ -7,13 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		672B562B20F4F85200258B6D /* ExampleUserService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672B562A20F4F85200258B6D /* ExampleUserService.swift */; };
+		672B562D20F4F89500258B6D /* ExampleController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672B562C20F4F89500258B6D /* ExampleController.swift */; };
+		672B562F20F4F8E200258B6D /* ExampleUserServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672B562E20F4F8E200258B6D /* ExampleUserServiceProtocol.swift */; };
 		67420EBE1B36CE9D00074F83 /* Resolver.h in Headers */ = {isa = PBXBuildFile; fileRef = 67420EBD1B36CE9D00074F83 /* Resolver.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		67420EC51B36CE9D00074F83 /* Resolver.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 67420EBA1B36CE9D00074F83 /* Resolver.framework */; };
 		67420ECA1B36CE9D00074F83 /* ResolverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67420EC91B36CE9D00074F83 /* ResolverTests.swift */; };
-		67420EDF1B36CEBB00074F83 /* ObjectExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67420EDD1B36CEBB00074F83 /* ObjectExtension.swift */; };
 		67420EE01B36CEBB00074F83 /* Resolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67420EDE1B36CEBB00074F83 /* Resolver.swift */; };
 		67420EE71B36CF2A00074F83 /* Resolver.swift in Headers */ = {isa = PBXBuildFile; fileRef = 67420EDE1B36CEBB00074F83 /* Resolver.swift */; settings = {ATTRIBUTES = (Public, ); }; };
-		67420EE81B36CF2D00074F83 /* ObjectExtension.swift in Headers */ = {isa = PBXBuildFile; fileRef = 67420EDD1B36CEBB00074F83 /* ObjectExtension.swift */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,13 +28,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		672B562A20F4F85200258B6D /* ExampleUserService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleUserService.swift; sourceTree = "<group>"; };
+		672B562C20F4F89500258B6D /* ExampleController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleController.swift; sourceTree = "<group>"; };
+		672B562E20F4F8E200258B6D /* ExampleUserServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleUserServiceProtocol.swift; sourceTree = "<group>"; };
 		67420EBA1B36CE9D00074F83 /* Resolver.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Resolver.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		67420EBD1B36CE9D00074F83 /* Resolver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Resolver.h; sourceTree = "<group>"; };
 		67420EBF1B36CE9D00074F83 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		67420EC41B36CE9D00074F83 /* ResolverTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ResolverTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		67420EC91B36CE9D00074F83 /* ResolverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResolverTests.swift; sourceTree = "<group>"; };
 		67420ECB1B36CE9D00074F83 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		67420EDD1B36CEBB00074F83 /* ObjectExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectExtension.swift; sourceTree = "<group>"; };
 		67420EDE1B36CEBB00074F83 /* Resolver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Resolver.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -77,10 +80,12 @@
 		67420EBC1B36CE9D00074F83 /* Resolver */ = {
 			isa = PBXGroup;
 			children = (
-				67420EDD1B36CEBB00074F83 /* ObjectExtension.swift */,
 				67420EDE1B36CEBB00074F83 /* Resolver.swift */,
 				67420EBD1B36CE9D00074F83 /* Resolver.h */,
 				67420EBF1B36CE9D00074F83 /* Info.plist */,
+				672B562A20F4F85200258B6D /* ExampleUserService.swift */,
+				672B562E20F4F8E200258B6D /* ExampleUserServiceProtocol.swift */,
+				672B562C20F4F89500258B6D /* ExampleController.swift */,
 			);
 			path = Resolver;
 			sourceTree = "<group>";
@@ -102,7 +107,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				67420EBE1B36CE9D00074F83 /* Resolver.h in Headers */,
-				67420EE81B36CF2D00074F83 /* ObjectExtension.swift in Headers */,
 				67420EE71B36CF2A00074F83 /* Resolver.swift in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -204,7 +208,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				67420EDF1B36CEBB00074F83 /* ObjectExtension.swift in Sources */,
+				672B562B20F4F85200258B6D /* ExampleUserService.swift in Sources */,
+				672B562D20F4F89500258B6D /* ExampleController.swift in Sources */,
+				672B562F20F4F8E200258B6D /* ExampleUserServiceProtocol.swift in Sources */,
 				67420EE01B36CEBB00074F83 /* Resolver.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -332,6 +338,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -349,6 +356,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.nthState.Resolver;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};
@@ -359,6 +367,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.nthState.ResolverTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -369,6 +378,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.nthState.ResolverTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};

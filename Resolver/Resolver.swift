@@ -27,176 +27,137 @@
 //  Copyright © 2015 nthState. All rights reserved.
 //
 
+//
+//  Dependency.swift
+//  MyFramework
+//
+//  Created by Chris Davis on 02/05/2017.
+//  Copyright © 2017 octopuslabs. All rights reserved.
+//
+
+// MARK:- Imports
+
 import Foundation
 import UIKit
 
-public let Resolver_test_arument = "TEST"
-let Resolver_test_prefix = "Resolver"
+// MARK:- References
 
-//: ## Resolver
-//:
-//: Uses Coding-by-convention:
-//: If your protocol is called: MyProtocol and lives in AppNameFramework
-//: Then your real implementation is called: My and lives in AppName
-//: Your test implementation is called: TestMy and lives in AppNameFrameworkTest
-//:
+public let Resolver_test_argument = "-RESOLVERTEST"
+public let Resolver_test_prefix = "Resolver"
+
+// MARK:- Class
+
 public class Resolver
 {
     
-    private static var testSingletons:[String:AnyObject] = [String:AnyObject]()
+    fileprivate static var testSharedInstances:[String:AnyObject] = [String:AnyObject]()
     
-    //: ## Create a serialized string of your objects
-    //:
-    //: Pass this into your UI Launch Arguments
-    //:
-    public class func DataForObjects(objects: AnyObject...) -> String
-    {
+    /**
+     Encodes testable objects, base 64's the data and outputs a string.
+     
+     This string is then sent in the launch arguments
+     */
+    public class func DataForObjects(_ objects: AnyObject...) -> String {
         var output:[String:String] = [String:String]()
-        for object in objects
-        {
-            let name = NSStringFromClass(object.dynamicType).componentsSeparatedByString(".").last!
-            let data = NSKeyedArchiver.archivedDataWithRootObject(object)
-            let asBase64 = data.base64EncodedStringWithOptions(NSDataBase64EncodingOptions(rawValue: 0))
+        for object in objects {
+            let name = NSStringFromClass(type(of: object)).components(separatedBy: ".").last!
+            let data = NSKeyedArchiver.archivedData(withRootObject: object)
+            let asBase64 = data.base64EncodedString(options: NSData.Base64EncodingOptions(rawValue: 0))
             output[name] = asBase64
         }
         
-        var bytes:NSData!
-        do
-        {
-            bytes = try NSJSONSerialization.dataWithJSONObject(output, options: NSJSONWritingOptions(rawValue: 0))
+        var bytes:Data!
+        do {
+            bytes = try JSONSerialization.data(withJSONObject: output, options: JSONSerialization.WritingOptions(rawValue: 0))
         } catch let error as NSError {
-            print("error serializing objects: \(error.localizedDescription)")
+            fatalError("error serializing objects: \(error.localizedDescription)")
         }
         
-        return Resolver_test_prefix + bytes.base64EncodedStringWithOptions(NSDataBase64EncodingOptions(rawValue: 0))
+        return Resolver_test_prefix + bytes.base64EncodedString(options: NSData.Base64EncodingOptions(rawValue: 0))
     }
     
-    //: ## Load a default object
-    //:
-    //: Note, sharedInstance is now an extension on NSObject public class var sharedInstance:NSObject
-    //:
-    private class func loadDefault<T>(name:String, useStatic:Bool = false) -> T?
-    {
-        let cls:AnyClass? = NSClassFromString(name)
-        let type:NSObject.Type = cls as! NSObject.Type
-        if useStatic == false{
-            return type.init() as? T
-        } else {
-            return type.sharedInstance as? T
-        }
-    }
-    
-    //: ## Resolve
-    //:
-    //: Uses Coding-by-convention:
-    //: If your protocol is called: MyProtocol and lives in AppNameFramework
-    //: Then your real implementation is called: My and lives in AppName
-    //: Your test implementation is called: TestMy and lives in AppNameFrameworkTest
-    //:
-    public class func Resolve<T>(name:String, useStatic:Bool = false, useTestFallBack:Bool = false) -> T?
-    {
-        let bundleName = NSBundle.mainBundle().infoDictionary!["CFBundleName"] as! String
-        let appPrefix = bundleName + "Framework"
-        let test = Process.arguments.contains(Resolver_test_arument)
+    /**
+     If the resolve method is used in the projects code, it tries to get a class from the framework project
+     and init' it up.
+     
+     However, if the code detects it's running from a UI Test, it tries to init up a test object.
+     */
+    public class func Resolve<T>(name:String, shared:AnyObject? = nil) -> T? {
         
-        var protocolName = "\(T.self)"
-        protocolName = protocolName.stringByReplacingOccurrencesOfString("Swift.Optional", withString: "")
-        protocolName = protocolName.stringByReplacingOccurrencesOfString("<", withString: "")
-        protocolName = protocolName.stringByReplacingOccurrencesOfString(">", withString: "")
-        protocolName = protocolName.stringByReplacingOccurrencesOfString(".", withString: "")
-        protocolName = protocolName.stringByReplacingOccurrencesOfString(appPrefix, withString: "")
-        protocolName = protocolName.stringByReplacingOccurrencesOfString("Protocol", withString: "")
-        let defaultName = bundleName + "." + protocolName
-        let testName = appPrefix + "Test" + ".Test" + protocolName
+        let isUITesting = CommandLine.arguments.contains(Resolver_test_argument)
         
-        print("Resolving: \(protocolName)")
-        
-        var obj:AnyObject!
-        if test == false
-        {
-            // Load real implementation
-            obj = loadDefault(defaultName, useStatic: useStatic)
+        if isUITesting == false {
+            return loadDefault(name: name, shared:shared)
         } else {
             
             // Take the encoded objects
-            let matchingArgument = Process.arguments.filter({$0.hasPrefix(Resolver_test_prefix)})
+            let matchingArgument = CommandLine.arguments.filter({$0.hasPrefix(Resolver_test_prefix)})
             
             var base64Encoded:String!
-            if let first = matchingArgument.first
-            {
-                let rangeToRemove = Range<String.Index>(start: Resolver_test_prefix.startIndex, end: Resolver_test_prefix.endIndex)
-                base64Encoded = first.stringByReplacingCharactersInRange(rangeToRemove, withString: "")
+            if let first = matchingArgument.first {
+                let rangeToRemove = Resolver_test_prefix.characters.indices.startIndex..<Resolver_test_prefix.characters.indices.endIndex
+                base64Encoded = first.replacingCharacters(in: rangeToRemove, with: "")
                 
-                
-                let data = NSData(base64EncodedString: base64Encoded, options: NSDataBase64DecodingOptions(rawValue: 0))!
+                let data = Data(base64Encoded: base64Encoded, options: NSData.Base64DecodingOptions(rawValue: 0))!
                 
                 // Try and parse them in a dictionary
                 var jsonObj:[String:String]!
-                do
-                {
-                    jsonObj = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions(rawValue: 0)) as! [String : String]
+                do {
+                    jsonObj = try JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions(rawValue: 0)) as! [String : String]
                 } catch let error as NSError {
                     print("error parsing serialized object to dictionary: \(error.localizedDescription)")
                 }
                 
                 // For each entity
-                for (key, value) in jsonObj
-                {
+                for (key, value) in jsonObj {
+                    
+                    let shortName = key.replacingOccurrences(of: "Test", with: "")
+                    if name.range(of: shortName) == nil {
+                        continue
+                    }
+                    
                     // Extract the base64 data and unarchive
-                    let base64Object = NSData(base64EncodedString: value, options: NSDataBase64DecodingOptions(rawValue: 0))!
-                    if let inst = NSKeyedUnarchiver.unarchiveObjectWithData(base64Object) as? T
-                    {
+                    let base64Object = Data(base64Encoded: value, options: NSData.Base64DecodingOptions(rawValue: 0))!
+                    if let inst = NSKeyedUnarchiver.unarchiveObject(with: base64Object) as? T {
                         // If we want a static, try and find it here
-                        if
-                            let existingInst = testSingletons[key] as? NSObject.Type
-                            where useStatic
-                        {
-                            return existingInst.sharedInstance as? T
+                        if let existingInst = testSharedInstances[key], shared != nil {
+                            return existingInst as? T
                         }
                         
-                        // Otherwise "init()" one up.
-                        let name = "\(inst.self)"
-                        if name.rangeOfString(key) != nil
-                        {
-                            testSingletons[key] = inst as! NSObject
-                            return inst// as? T
+                        let instanceName = "\(inst.self)"
+                        if instanceName.range(of: key) != nil {
+                            testSharedInstances[key] = inst as! NSObject
+                            return inst
                         }
+                    } else {
+                        print("Could not unarchive: \(name)")
                     }
                 }
                 
-                
-            } else if useTestFallBack {
-                print("No data found found, try useTestFallBack: \(useTestFallBack)")
-                
-                obj = loadDefault(testName, useStatic: useStatic)
-                testSingletons[testName] = obj
-                
-                return obj as? T
-            } else {
+                // If not found.
+                return loadDefault(name: name, shared:shared)
                 
             }
             
-            
-            // load a default, if no test implementation was found.
-            obj = loadDefault(defaultName, useStatic: useStatic)
-            
         }
         
-        return obj as? T
+        return nil
     }
     
-    //: ## ResolveNotNil
-    //:
-    //: Resolve if passed object is not nil.
-    //:
-    public class func Resolve<T>(objectToInit:AnyObject?, useStatic:Bool = false) -> T?
-    {
-        if objectToInit != nil
-        {
-            return objectToInit as? T
+    /**
+     Load default implementation of object
+     */
+    class func loadDefault<T>(name:String, shared:AnyObject? = nil) -> T? {
+        let cls:AnyClass? = NSClassFromString("MyFramework." + name)
+        let type:NSObject.Type = cls as! NSObject.Type
+        if shared == nil {
+            return type.init() as? T
         } else {
-            return Resolver.Resolve("", useStatic:useStatic)
+            return (shared as! T)
         }
     }
     
 }
+
+
+
